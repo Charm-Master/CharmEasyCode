@@ -2,141 +2,764 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drag and Drop Code Builder</title>
+    <title>Drag & Drop Python Code Builder</title>
     <style>
+        /* Basic Reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            margin: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #f0f2f5;
+        }
+
+        /* Sidebar for Code Bits */
+        .sidebar {
+            width: 350px; /* Increased width to accommodate more buttons */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+
+        /* Guide Button */
+        .guide-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #2980b9;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .guide-btn:hover {
+            background-color: #1f6391;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        /* Code Bits List */
+        .code-bits {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-start;
+        }
+
+        .code-bit {
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: grab;
+            text-align: center;
+            color: #ffffff;
+            user-select: none;
+            font-size: 14px;
+            min-width: 80px;
+            transition: transform 0.2s;
+        }
+
+        .code-bit:active {
+            transform: scale(0.95);
+        }
+
+        /* Specific Colors for Code Bits */
+        .print { background-color: #9b59b6; } /* Purple */
+        .if { background-color: #f1c40f; }    /* Yellow */
+        .elif { background-color: #f39c12; }  /* Dark Yellow */
+        .else { background-color: #e67e22; }  /* Orange */
+        .while { background-color: #e74c3c; } /* Red */
+        .for { background-color: #1abc9c; }   /* Teal */
+        .def { background-color: #3498db; }   /* Blue */
+        .class { background-color: #2980b9; } /* Dark Blue */
+        .import { background-color: #16a085; } /* Green */
+        .from { background-color: #27ae60; }   /* Dark Green */
+        .try { background-color: #d35400; }    /* Pumpkin */
+        .except { background-color: #c0392b; } /* Dark Red */
+        .finally { background-color: #8e44ad; }/* Dark Purple */
+        .return { background-color: #2ecc71; } /* Emerald */
+        .break { background-color: #34495e; }  /* Wet Asphalt */
+        .continue { background-color: #95a5a6; } /* Concrete */
+        .pass { background-color: #7f8c8d; }    /* Asbestos */
+        .input { background-color: #e67e22; }  /* Orange */
+        .variable { background-color: #f39c12; } /* Dark Yellow */
+        .and, .or, .not { background-color: #f39c12; } /* Logical Operators */
+        /* Add more classes as needed */
+
+        /* Main Content Area */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
             padding: 20px;
         }
 
-        h1 {
-            text-align: center;
-            color: #4CAF50;
+        /* Editor Header */
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
         }
 
-        #code-area {
-            border: 1px solid #ccc;
-            min-height: 200px;
-            margin: 20px 0;
-            padding: 10px;
-            background-color: #fff;
+        .editor-header h2 {
+            font-size: 1.5em;
+            color: #2c3e50;
         }
 
-        .draggable {
-            padding: 10px;
-            margin: 5px;
-            cursor: move;
-            border-radius: 5px;
-            text-align: center;
-        }
-
-        .if { background-color: #c2b5e6; } /* Purple */
-        .while { background-color: #fffacd; } /* Yellow */
-        .print { background-color: #ffcccb; } /* Red */
-        .and { background-color: #d0e8d0; } /* Green */
-        .not { background-color: #add8e6; } /* Light Blue */
-
-        #search-bar {
-            margin: 10px 0;
-            padding: 10px;
-            width: calc(100% - 20px);
-        }
-
-        #download-btn {
-            display: block;
-            margin: 20px auto;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
+        .download-btn {
+            padding: 8px 16px;
+            background-color: #2ecc71;
+            color: #ffffff;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .download-btn:hover {
+            background-color: #27ae60;
+        }
+
+        /* Editor Controls */
+        .editor-controls {
+            margin-bottom: 10px;
+        }
+
+        .editor-controls button {
+            padding: 6px 12px;
+            margin-right: 5px;
+            background-color: #3498db;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .editor-controls button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Specific Styles for Clear Button */
+        .editor-controls #clearBtn {
+            background-color: #e74c3c;
+        }
+
+        .editor-controls #clearBtn:hover {
+            background-color: #c0392b;
+        }
+
+        /* Code Editor */
+        #code-editor {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #bdc3c7;
+            border-radius: 4px;
+            background-color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            overflow: auto;
+            min-height: 300px;
+            position: relative;
+            line-height: 1.5;
+        }
+
+        /* Placeholder Text */
+        #code-editor:empty::before {
+            content: "# Start coding here...";
+            color: #7f8c8d;
+            position: absolute;
+            top: 15px;
+            left: 15px;
+        }
+
+        /* Code Bit Elements in Editor */
+        .editor-bit {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 20px;
+            margin: 2px;
+            color: #ffffff;
+            cursor: pointer;
+            user-select: none;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+
+        .editor-bit:active {
+            transform: scale(0.95);
+        }
+
+        /* Highlight Drop Zone on Drag Over */
+        #code-editor.dragover {
+            border-color: #3498db;
+            background-color: #ecf0f1;
+        }
+
+        /* Indentation */
+        .indent {
+            margin-left: 40px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: 300px;
+                overflow-x: auto;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .code-bits {
+                justify-content: flex-start;
+            }
+
+            .main {
+                flex: none;
+                height: calc(100vh - 300px);
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto; /* 10% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .close {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 25px;
+            font-size: 28px;
+            font-weight: bold;
             cursor: pointer;
         }
 
-        #download-btn:hover {
-            background-color: #45a049;
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+        }
+
+        /* Scrollbar Styling */
+        .sidebar::-webkit-scrollbar,
+        .main::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sidebar::-webkit-scrollbar-track,
+        .main::-webkit-scrollbar-track {
+            background: #ecf0f1;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb,
+        .main::-webkit-scrollbar-thumb {
+            background: #95a5a6;
+            border-radius: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover,
+        .main::-webkit-scrollbar-thumb:hover {
+            background: #7f8c8d;
         }
     </style>
 </head>
 <body>
-    <h1>Drag and Drop Code Builder</h1>
-    <input type="text" id="search-bar" placeholder="Search for code snippets...">
-    <div id="code-area" contenteditable="true"></div>
 
-    <div>
-        <div class="draggable if" draggable="true">if</div>
-        <div class="draggable while" draggable="true">while</div>
-        <div class="draggable print" draggable="true">print</div>
-        <div class="draggable and" draggable="true">and</div>
-        <div class="draggable not" draggable="true">not</div>
+    <!-- Sidebar with Code Bits and Search -->
+    <div class="sidebar">
+        <h2>Code Blocks</h2>
+        <button class="guide-btn" id="guideBtn">Guide</button>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search code bits..." aria-label="Search code bits">
+        </div>
+        <div class="code-bits" id="codeBits">
+            <!-- Control Structures -->
+            <div class="code-bit if" draggable="true" data-code="if condition:\n    ">if</div>
+            <div class="code-bit elif" draggable="true" data-code="elif condition:\n    ">elif</div>
+            <div class="code-bit else" draggable="true" data-code="else:\n    ">else</div>
+            <div class="code-bit while" draggable="true" data-code="while condition:\n    ">while</div>
+            <div class="code-bit for" draggable="true" data-code="for item in iterable:\n    ">for</div>
+            <div class="code-bit break" draggable="true" data-code="break">break</div>
+            <div class="code-bit continue" draggable="true" data-code="continue">continue</div>
+
+            <!-- Function and Class Definitions -->
+            <div class="code-bit def" draggable="true" data-code="def function_name():\n    ">def</div>
+            <div class="code-bit class" draggable="true" data-code="class ClassName:\n    ">class</div>
+
+            <!-- Exception Handling -->
+            <div class="code-bit try" draggable="true" data-code="try:\n    ">try</div>
+            <div class="code-bit except" draggable="true" data-code="except Exception as e:\n    ">except</div>
+            <div class="code-bit finally" draggable="true" data-code="finally:\n    ">finally</div>
+
+            <!-- Imports -->
+            <div class="code-bit import" draggable="true" data-code="import module">import</div>
+            <div class="code-bit from" draggable="true" data-code="from module import">from</div>
+
+            <!-- Logical Operators -->
+            <div class="code-bit and" draggable="true" data-code=" and ">and</div>
+            <div class="code-bit or" draggable="true" data-code=" or ">or</div>
+            <div class="code-bit not" draggable="true" data-code=" not ">not</div>
+
+            <!-- Other Statements -->
+            <div class="code-bit print" draggable="true" data-code="print()">print()</div>
+            <div class="code-bit return" draggable="true" data-code="return ">return</div>
+            <div class="code-bit pass" draggable="true" data-code="pass">pass</div>
+            <div class="code-bit input" draggable="true" data-code="input('Enter value: ')">input()</div>
+            <div class="code-bit variable" draggable="true" data-code="variable = value">variable</div>
+
+            <!-- Add more code bits as needed -->
+        </div>
     </div>
 
-    <button id="download-btn">Download Code as .py</button>
+    <!-- Main Content Area with Code Editor -->
+    <div class="main">
+        <div class="editor-header">
+            <h2>Python Code Editor</h2>
+            <button class="download-btn" id="downloadBtn">Download .py</button>
+        </div>
+        <div class="editor-controls">
+            <button id="indentBtn">Indent</button>
+            <button id="unindentBtn">Unindent</button>
+            <button id="clearBtn">Clear</button>
+        </div>
+        <div id="code-editor" contenteditable="true" aria-label="Python code editor">
+            <!-- Users can drop code bits here -->
+        </div>
+    </div>
 
+    <!-- Modal for Guide -->
+    <div id="guideModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+        <div class="modal-content">
+            <span class="close" aria-label="Close Guide">&times;</span>
+            <h2 id="guideTitle">Guide to Using the Drag & Drop Python Code Builder</h2>
+            <p>Welcome to the Drag & Drop Python Code Builder! Here's how to get started:</p>
+            <ul>
+                <li><strong>Drag & Drop:</strong> Click and drag any code bit from the sidebar into the code editor area. Drop it where you want it to appear.</li>
+                <li><strong>Indentation:</strong> Use the "Indent" and "Unindent" buttons to adjust the indentation level of the selected code bit. Proper indentation is crucial in Python.</li>
+                <li><strong>Search:</strong> Use the search bar in the sidebar to quickly find specific code bits by typing keywords like "print", "if", "def", etc.</li>
+                <li><strong>Download:</strong> Once you've assembled your code, click the "Download .py" button to save your script as a Python file.</li>
+                <li><strong>Clear Editor:</strong> If you want to start fresh, click the "Clear" button to remove all code bits from the editor. You'll be prompted to confirm this action.</li>
+                <li><strong>Guide Button:</strong> Click the "Guide" button at the top-right of the sidebar anytime you need assistance.</li>
+                <li><strong>Typing:</strong> You can also type directly into the editor. However, only the code bits dragged and dropped will have color-coding.</li>
+            </ul>
+            <p>Happy Coding!</p>
+        </div>
+    </div>
+
+    <!-- JavaScript for Functionality -->
     <script>
-        const draggables = document.querySelectorAll('.draggable');
-        const codeArea = document.getElementById('code-area');
-        const searchBar = document.getElementById('search-bar');
+        document.addEventListener('DOMContentLoaded', () => {
+            // Elements
+            const codeBits = document.querySelectorAll('.code-bit');
+            const codeEditor = document.getElementById('code-editor');
+            const searchInput = document.getElementById('searchInput');
+            const indentBtn = document.getElementById('indentBtn');
+            const unindentBtn = document.getElementById('unindentBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const guideBtn = document.getElementById('guideBtn');
+            const guideModal = document.getElementById('guideModal');
+            const closeModal = document.querySelector('.close');
 
-        // Drag and Drop Functionality
-        draggables.forEach(draggable => {
-            draggable.addEventListener('dragstart', () => {
-                draggable.classList.add('dragging');
-            });
+            // Initialize Drag and Drop
+            initDragAndDrop();
 
-            draggable.addEventListener('dragend', () => {
-                draggable.classList.remove('dragging');
-            });
-        });
+            // Initialize Search Functionality
+            initSearch();
 
-        codeArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            const afterElement = getDragAfterElement(codeArea, e.clientY);
-            const draggable = document.querySelector('.dragging');
-            if (afterElement == null) {
-                codeArea.appendChild(draggable);
-            } else {
-                codeArea.insertBefore(draggable, afterElement);
+            // Initialize Editor Controls
+            initEditorControls();
+
+            // Initialize Download Functionality
+            initDownload();
+
+            // Initialize Modal Functionality
+            initModal();
+
+            // Initialize Keyboard Shortcuts
+            initKeyboardShortcuts();
+
+            /**
+             * Initialize Drag and Drop for Code Bits
+             */
+            function initDragAndDrop() {
+                codeBits.forEach(bit => {
+                    bit.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('text/plain', bit.getAttribute('data-code'));
+                        e.dataTransfer.setData('text/html', bit.outerHTML);
+                        // Optional: Set drag image for better UX
+                        const dragIcon = document.createElement('div');
+                        dragIcon.innerHTML = bit.outerHTML;
+                        dragIcon.style.position = 'absolute';
+                        dragIcon.style.top = '-1000px';
+                        document.body.appendChild(dragIcon);
+                        e.dataTransfer.setDragImage(dragIcon, 0, 0);
+                        setTimeout(() => {
+                            document.body.removeChild(dragIcon);
+                        }, 0);
+                    });
+                });
+
+                // Prevent default behavior for dragover and drop
+                codeEditor.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    codeEditor.classList.add('dragover');
+                });
+
+                codeEditor.addEventListener('dragleave', () => {
+                    codeEditor.classList.remove('dragover');
+                });
+
+                codeEditor.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    codeEditor.classList.remove('dragover');
+                    const code = e.dataTransfer.getData('text/plain');
+                    const html = e.dataTransfer.getData('text/html');
+                    insertBitAtCursor(code, html);
+                });
             }
-        });
 
-        function getDragAfterElement(container, y) {
-            const draggableElements = [...container.querySelectorAll('.draggable')];
-            return draggableElements.reduce((closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
-                if (offset < 0 && offset > closest.offset) {
-                    return { offset: offset, element: child };
-                } else {
-                    return closest;
+            /**
+             * Insert Code Bit at the Cursor Position in the Editor
+             * @param {string} code - The raw code to insert
+             * @param {string} html - The HTML representation of the code bit
+             */
+            function insertBitAtCursor(code, html) {
+                const sel = window.getSelection();
+                if (!sel.rangeCount) return;
+                const range = sel.getRangeAt(0);
+                range.collapse(true);
+
+                // Create a temporary div to parse the HTML
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                const bitElement = tempDiv.firstChild.cloneNode(true);
+
+                // Convert to editor-bit class for styling
+                bitElement.classList.remove('code-bit');
+                bitElement.classList.add('editor-bit');
+
+                // Handle multi-line code snippets
+                const lines = code.split('\n');
+                lines.forEach((line, index) => {
+                    if (line.trim() === '') return;
+                    const span = document.createElement('span');
+                    span.classList.add('editor-bit');
+
+                    // Assign the same color class as the original bit
+                    bitElement.classList.forEach(cls => {
+                        if (cls !== 'editor-bit') { // Avoid duplicating 'editor-bit' class
+                            span.classList.add(cls);
+                        }
+                    });
+
+                    // Replace placeholders with default values or prompt user
+                    let lineText = line;
+                    if (line.includes('condition')) {
+                        lineText = line.replace('condition', 'your_condition');
+                    }
+                    if (line.includes('module')) {
+                        lineText = line.replace('module', 'module_name');
+                    }
+                    if (line.includes('function_name')) {
+                        lineText = line.replace('function_name', 'my_function');
+                    }
+                    if (line.includes('ClassName')) {
+                        lineText = line.replace('ClassName', 'MyClass');
+                    }
+                    if (line.includes('variable = value')) {
+                        lineText = line.replace('variable = value', 'variable = 10');
+                    }
+
+                    span.innerText = lineText.trim();
+                    range.insertNode(span);
+
+                    // Insert a line break if not the last line
+                    if (index < lines.length - 1) {
+                        range.insertNode(document.createElement('br'));
+                    }
+
+                    // Move the range to after the inserted node
+                    range.setStartAfter(span);
+                    range.setEndAfter(span);
+                });
+
+                // Move the cursor after the inserted bit
+                sel.removeAllRanges();
+                sel.addRange(range);
+                codeEditor.focus();
+            }
+
+            /**
+             * Initialize Search Functionality for Code Bits
+             */
+            function initSearch() {
+                searchInput.addEventListener('input', () => {
+                    const filter = searchInput.value.toLowerCase();
+                    codeBits.forEach(bit => {
+                        const text = bit.textContent.toLowerCase();
+                        if (text.includes(filter)) {
+                            bit.style.display = 'inline-block';
+                        } else {
+                            bit.style.display = 'none';
+                        }
+                    });
+                });
+            }
+
+            /**
+             * Initialize Editor Controls (Indent, Unindent, Clear)
+             */
+            function initEditorControls() {
+                indentBtn.addEventListener('click', () => {
+                    applyIndentation('indent');
+                });
+
+                unindentBtn.addEventListener('click', () => {
+                    applyIndentation('unindent');
+                });
+
+                clearBtn.addEventListener('click', () => {
+                    if (confirm('Are you sure you want to clear the editor?')) {
+                        codeEditor.innerHTML = '';
+                    }
+                });
+            }
+
+            /**
+             * Apply Indentation or Unindentation to Selected Code Bit
+             * @param {string} action - 'indent' or 'unindent'
+             */
+            function applyIndentation(action) {
+                const selection = window.getSelection();
+                if (selection.rangeCount === 0) return;
+                let node = selection.anchorNode;
+
+                // Traverse up to find the closest editor-bit element
+                while (node && node !== codeEditor && !node.classList.contains('editor-bit')) {
+                    node = node.parentNode;
                 }
-            }, { offset: Number.NEGATIVE_INFINITY }).element;
-        }
 
-        // Search Functionality
-        searchBar.addEventListener('input', (e) => {
-            const searchText = e.target.value.toLowerCase();
-            draggables.forEach(draggable => {
-                if (draggable.innerText.toLowerCase().includes(searchText)) {
-                    draggable.style.display = 'block';
-                } else {
-                    draggable.style.display = 'none';
+                if (node && node.classList.contains('editor-bit')) {
+                    let currentIndent = parseInt(node.getAttribute('data-indent')) || 0;
+                    if (action === 'indent') {
+                        currentIndent += 1;
+                    } else if (action === 'unindent' && currentIndent > 0) {
+                        currentIndent -= 1;
+                    }
+                    node.setAttribute('data-indent', currentIndent);
+                    node.style.marginLeft = `${currentIndent * 40}px`;
                 }
-            });
-        });
+            }
 
-        // Download Functionality
-        document.getElementById('download-btn').addEventListener('click', () => {
-            const code = codeArea.innerText.trim();
-            const blob = new Blob([code], { type: 'text/python' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'code.py';
-            link.click();
+            /**
+             * Initialize Download Functionality
+             */
+            function initDownload() {
+                downloadBtn.addEventListener('click', () => {
+                    const code = generateCodeFromEditor();
+                    if (!validatePythonCode(code)) {
+                        alert('There are syntax errors in your code. Please review before downloading.');
+                        return;
+                    }
+                    const blob = new Blob([code], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'code.py';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                });
+            }
+
+            /**
+             * Generate Python Code from Editor Content
+             * @returns {string} - The generated Python code
+             */
+            function generateCodeFromEditor() {
+                let code = '';
+                const children = codeEditor.childNodes;
+                let currentIndent = 0;
+
+                children.forEach(node => {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        code += node.textContent;
+                    } else if (node.nodeType === Node.ELEMENT_NODE) {
+                        if (node.classList.contains('editor-bit')) {
+                            const indentLevel = parseInt(node.getAttribute('data-indent')) || 0;
+                            currentIndent = indentLevel;
+                            const indent = '    '.repeat(indentLevel); // 4 spaces per indent level
+                            code += indent + node.innerText;
+                        }
+                        if (node.tagName === 'BR') {
+                            code += '\n';
+                        }
+                    }
+                });
+
+                return code;
+            }
+
+            /**
+             * Basic Python Syntax Validation
+             * @param {string} code - The Python code to validate
+             * @returns {boolean} - True if syntax is valid, else false
+             */
+            function validatePythonCode(code) {
+                // Since we can't execute Python in the browser, we'll perform basic checks
+                // Check for consistent indentation
+                const lines = code.split('\n');
+                const indentStack = [0];
+                for (let line of lines) {
+                    if (line.trim() === '') continue; // Skip empty lines
+                    const currentIndent = line.match(/^ */)[0].length;
+                    const lastIndent = indentStack[indentStack.length - 1];
+
+                    if (currentIndent > lastIndent) {
+                        indentStack.push(currentIndent);
+                    } else {
+                        while (currentIndent < lastIndent) {
+                            indentStack.pop();
+                            if (indentStack.length === 0) break;
+                        }
+                        if (currentIndent !== indentStack[indentStack.length - 1]) {
+                            return false;
+                        }
+                    }
+
+                    // Basic syntax checks for block starters
+                    if (/^(if|elif|else|for|while|def|class|try|except|finally)\b.*:$/.test(line.trim())) {
+                        // Expect the next indented line
+                        // This is a simplistic check
+                        continue;
+                    }
+                }
+
+                return true;
+            }
+
+            /**
+             * Initialize Modal Functionality for Guide
+             */
+            function initModal() {
+                // Open Modal
+                guideBtn.addEventListener('click', () => {
+                    guideModal.style.display = 'block';
+                    // Trap focus within the modal
+                    guideModal.setAttribute('tabindex', '-1');
+                    guideModal.focus();
+                });
+
+                // Close Modal when clicking on <span> (x)
+                closeModal.addEventListener('click', () => {
+                    guideModal.style.display = 'none';
+                });
+
+                // Close Modal when clicking outside the modal content
+                window.addEventListener('click', (event) => {
+                    if (event.target == guideModal) {
+                        guideModal.style.display = 'none';
+                    }
+                });
+
+                // Close Modal with Escape key
+                window.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape' && guideModal.style.display === 'block') {
+                        guideModal.style.display = 'none';
+                    }
+                });
+            }
+
+            /**
+             * Initialize Keyboard Shortcuts for Enhanced UX
+             */
+            function initKeyboardShortcuts() {
+                codeEditor.addEventListener('keydown', (e) => {
+                    if (e.key === 'Tab') {
+                        e.preventDefault();
+                        document.execCommand('insertHTML', false, '    '); // Insert 4 spaces
+                    }
+
+                    // Shortcut for Indent: Ctrl + ]
+                    if (e.ctrlKey && e.key === ']') {
+                        e.preventDefault();
+                        applyIndentation('indent');
+                    }
+
+                    // Shortcut for Unindent: Ctrl + [
+                    if (e.ctrlKey && e.key === '[') {
+                        e.preventDefault();
+                        applyIndentation('unindent');
+                    }
+
+                    // Shortcut for Clear: Ctrl + Shift + C
+                    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'c') {
+                        e.preventDefault();
+                        clearBtn.click();
+                    }
+
+                    // Shortcut for Download: Ctrl + D
+                    if (e.ctrlKey && e.key.toLowerCase() === 'd') {
+                        e.preventDefault();
+                        downloadBtn.click();
+                    }
+                });
+            }
         });
     </script>
 </body>
