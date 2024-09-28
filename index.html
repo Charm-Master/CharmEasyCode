@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drag and Drop Code Builder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+
+        #code-area {
+            border: 1px solid #ccc;
+            min-height: 200px;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #fff;
+        }
+
+        .draggable {
+            padding: 10px;
+            margin: 5px;
+            cursor: move;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .if { background-color: #c2b5e6; } /* Purple */
+        .while { background-color: #fffacd; } /* Yellow */
+        .print { background-color: #ffcccb; } /* Red */
+        .and { background-color: #d0e8d0; } /* Green */
+        .not { background-color: #add8e6; } /* Light Blue */
+
+        #search-bar {
+            margin: 10px 0;
+            padding: 10px;
+            width: calc(100% - 20px);
+        }
+
+        #download-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #download-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Drag and Drop Code Builder</h1>
+    <input type="text" id="search-bar" placeholder="Search for code snippets...">
+    <div id="code-area" contenteditable="true"></div>
+
+    <div>
+        <div class="draggable if" draggable="true">if</div>
+        <div class="draggable while" draggable="true">while</div>
+        <div class="draggable print" draggable="true">print</div>
+        <div class="draggable and" draggable="true">and</div>
+        <div class="draggable not" draggable="true">not</div>
+    </div>
+
+    <button id="download-btn">Download Code as .py</button>
+
+    <script>
+        const draggables = document.querySelectorAll('.draggable');
+        const codeArea = document.getElementById('code-area');
+        const searchBar = document.getElementById('search-bar');
+
+        // Drag and Drop Functionality
+        draggables.forEach(draggable => {
+            draggable.addEventListener('dragstart', () => {
+                draggable.classList.add('dragging');
+            });
+
+            draggable.addEventListener('dragend', () => {
+                draggable.classList.remove('dragging');
+            });
+        });
+
+        codeArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(codeArea, e.clientY);
+            const draggable = document.querySelector('.dragging');
+            if (afterElement == null) {
+                codeArea.appendChild(draggable);
+            } else {
+                codeArea.insertBefore(draggable, afterElement);
+            }
+        });
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.draggable')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        // Search Functionality
+        searchBar.addEventListener('input', (e) => {
+            const searchText = e.target.value.toLowerCase();
+            draggables.forEach(draggable => {
+                if (draggable.innerText.toLowerCase().includes(searchText)) {
+                    draggable.style.display = 'block';
+                } else {
+                    draggable.style.display = 'none';
+                }
+            });
+        });
+
+        // Download Functionality
+        document.getElementById('download-btn').addEventListener('click', () => {
+            const code = codeArea.innerText.trim();
+            const blob = new Blob([code], { type: 'text/python' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'code.py';
+            link.click();
+        });
+    </script>
+</body>
+</html>
